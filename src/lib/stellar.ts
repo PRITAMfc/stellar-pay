@@ -5,7 +5,8 @@ import {
   signTransaction,
 } from "@stellar/freighter-api";
 
-const HORIZON_URL = "https://horizon-testnet.stellar.org";
+const HORIZON_URL = process.env.HORIZON_URL || "https://horizon-testnet.stellar.org";
+const NETWORK_PASSPHRASE = process.env.NETWORK_PASSPHRASE || "Test SDF Network ; September 2015";
 const server = new StellarSdk.Horizon.Server(HORIZON_URL);
 
 export async function checkFreighterConnection(): Promise<boolean> {
@@ -25,17 +26,12 @@ export async function getFreighterAddress(): Promise<string> {
 
 export async function fetchXLMBalance(publicKey: string): Promise<string> {
   try {
-    const response = await fetch(
-      `https://horizon-testnet.stellar.org/accounts/${publicKey}`
-    );
+    const response = await fetch(`/api/balance?address=${publicKey}`);
     if (!response.ok) {
-      throw new Error("Account not found");
+      return "0";
     }
     const data = await response.json();
-    const xlmBalance = data.balances?.find(
-      (b: { asset_type: string }) => b.asset_type === "native"
-    );
-    return xlmBalance ? xlmBalance.balance : "0";
+    return data.balance || "0";
   } catch (error) {
     console.error("Failed to fetch balance:", error);
     return "0";
@@ -53,7 +49,7 @@ export async function sendXLM(
 
     const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
       fee: fee.toString(),
-      networkPassphrase: StellarSdk.Networks.TESTNET,
+      networkPassphrase: NETWORK_PASSPHRASE,
     })
       .addOperation(
         StellarSdk.Operation.payment({
@@ -68,7 +64,7 @@ export async function sendXLM(
     const txXDR = transaction.toXDR();
 
     const signResult = await signTransaction(txXDR, {
-      networkPassphrase: StellarSdk.Networks.TESTNET,
+      networkPassphrase: NETWORK_PASSPHRASE,
     });
 
     if (signResult.error) throw new Error(signResult.error);
@@ -76,7 +72,7 @@ export async function sendXLM(
     const result = await server
       .submitTransaction(StellarSdk.TransactionBuilder.fromXDR(
         signResult.signedTxXdr,
-        StellarSdk.Networks.TESTNET
+        NETWORK_PASSPHRASE
       ));
 
     return { success: true, hash: result.hash };

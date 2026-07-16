@@ -45,6 +45,10 @@ export function useWallet() {
       }
 
       const address = await getFreighterAddress();
+      if (!address || address.length === 0) {
+        setWallet((prev) => ({ ...prev, isLoading: false }));
+        return { success: false, error: "Could not get wallet address" };
+      }
       setWallet((prev) => ({
         ...prev,
         isConnected: true,
@@ -91,12 +95,14 @@ export function useWallet() {
         const connected = await checkFreighterConnection();
         if (connected) {
           const address = await getFreighterAddress();
-          setWallet((prev) => ({
-            ...prev,
-            isConnected: true,
-            address,
-          }));
-          await refreshBalance(address);
+          if (address && address.length > 0) {
+            setWallet((prev) => ({
+              ...prev,
+              isConnected: true,
+              address,
+            }));
+            await refreshBalance(address);
+          }
         }
       } catch {
         // Freighter not available
@@ -109,7 +115,9 @@ export function useWallet() {
     ...wallet,
     connect,
     disconnect,
-    refreshBalance: () => refreshBalance(wallet.address),
+    refreshBalance: () => {
+      if (wallet.address) refreshBalance(wallet.address);
+    },
     sendTransaction,
   };
 }
