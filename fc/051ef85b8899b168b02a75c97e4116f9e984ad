@@ -1,0 +1,19 @@
+src/lib/stellar.ts
+  s_1817c4f33e267a::t_61cd89c288a267 15-18,24-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "fc051ef85b8899b168b02a75c97e4116f9e984ad",
+  "prompts": {},
+  "sessions": {
+    "s_1817c4f33e267a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_095a58014ffeaLeUi1S7ihSQPq",
+        "model": "unknown"
+      },
+      "human_author": "PRITAMfc <proumg2@gmail.com>"
+    }
+  }
+}
