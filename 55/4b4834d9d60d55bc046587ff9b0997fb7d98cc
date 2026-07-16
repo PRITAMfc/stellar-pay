@@ -1,0 +1,25 @@
+src/app/api/balance/route.ts
+  s_1817c4f33e267a::t_80e4e3f10d8492 1-25
+src/lib/stellar.ts
+  s_1817c4f33e267a::t_174d31e5023915 8-9,29,31,34,52,67,75
+src/lib/useWallet.ts
+  s_1817c4f33e267a::t_1481c690bb9c43 118-120
+  s_1817c4f33e267a::t_e063275705bfcd 48-51
+  s_1817c4f33e267a::t_16a3dc5e2fa752 98-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "554b4834d9d60d55bc046587ff9b0997fb7d98cc",
+  "prompts": {},
+  "sessions": {
+    "s_1817c4f33e267a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_095a58014ffeaLeUi1S7ihSQPq",
+        "model": "unknown"
+      },
+      "human_author": "PRITAMfc <proumg2@gmail.com>"
+    }
+  }
+}
