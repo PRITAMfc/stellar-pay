@@ -25,9 +25,15 @@ export async function getFreighterAddress(): Promise<string> {
 
 export async function fetchXLMBalance(publicKey: string): Promise<string> {
   try {
-    const account = await server.loadAccount(publicKey);
-    const xlmBalance = account.balances.find(
-      (b) => b.asset_type === "native"
+    const response = await fetch(
+      `https://horizon-testnet.stellar.org/accounts/${publicKey}`
+    );
+    if (!response.ok) {
+      throw new Error("Account not found");
+    }
+    const data = await response.json();
+    const xlmBalance = data.balances?.find(
+      (b: { asset_type: string }) => b.asset_type === "native"
     );
     return xlmBalance ? xlmBalance.balance : "0";
   } catch (error) {
