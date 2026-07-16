@@ -1,7 +1,5 @@
 import * as StellarSdk from "@stellar/stellar-sdk";
 import {
-  isConnected,
-  getAddress,
   signTransaction,
 } from "@stellar/freighter-api";
 
@@ -9,11 +7,35 @@ const HORIZON_URL = process.env.HORIZON_URL || "https://horizon-testnet.stellar.
 const NETWORK_PASSPHRASE = process.env.NETWORK_PASSPHRASE || "Test SDF Network ; September 2015";
 const server = new StellarSdk.Horizon.Server(HORIZON_URL);
 
+declare global {
+  interface Window {
+    freighter?: {
+      isConnected?: () => Promise<boolean>;
+      getAddress?: () => Promise<string>;
+      signTransaction?: (tx: string, opts?: { network?: string; networkPassphrase?: string }) => Promise<string>;
+    };
+  }
+}
+
+async function getFreighter(): Promise<typeof window.freighter | null> {
+  if (typeof window !== "undefined" && window.freighter) {
+    return window.freighter;
+  }
+  return null;
+}
+
 export async function checkFreighterConnection(): Promise<boolean> {
   try {
-    const result = await isConnected();
-    console.log("Freighter isConnected result:", result);
-    return !!result.isConnected;
+    const freighter = await getFreighter();
+    if (!freighter) {
+      console.log("Freighter extension not found on window");
+      return false;
+    }
+    console.log("Freighter object found:", Object.keys(freighter));
+    if (freighter.isConnected) {
+      return await freighter.isConnected();
+    }
+    return true;
   } catch (e) {
     console.error("Freighter not detected:", e);
     return false;
@@ -22,15 +44,28 @@ export async function checkFreighterConnection(): Promise<boolean> {
 
 export async function getFreighterAddress(): Promise<{ address: string; error?: string }> {
   try {
-    const result = await getAddress();
-    console.log("Freighter getAddress result:", result);
+    const freighter = await getFreighter();
+    if (!freighter) {
+      return { address: "", error: "Freighter extension not found. Install from freighter.app" };
+    }
+
+    if (freighter.getAddress) {
+      const address = await freighter.getAddress();
+      console.log("Freighter getAddress:", address);
+      if (address) {
+        return { address };
+      }
+    }
+
+    const result = await import("@stellar/freighter-api").then(m => m.getAddress());
+    console.log("Freighter SDK getAddress:", result);
     if (result.error) {
       return { address: "", error: result.error || "Failed to get address" };
     }
     return { address: result.address };
   } catch (e) {
     console.error("getAddress failed:", e);
-    return { address: "", error: "Freighter extension not found. Please install it from freighter.app" };
+    return { address: "", error: "Could not get wallet address. Make sure Freighter is unlocked and set to Testnet." };
   }
 }
 
