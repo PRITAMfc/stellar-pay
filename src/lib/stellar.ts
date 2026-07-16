@@ -12,18 +12,26 @@ const server = new StellarSdk.Horizon.Server(HORIZON_URL);
 export async function checkFreighterConnection(): Promise<boolean> {
   try {
     const result = await isConnected();
-    return result.isConnected;
-  } catch {
+    console.log("Freighter isConnected result:", result);
+    return !!result.isConnected;
+  } catch (e) {
+    console.error("Freighter not detected:", e);
     return false;
   }
 }
 
 export async function getFreighterAddress(): Promise<{ address: string; error?: string }> {
-  const result = await getAddress();
-  if (result.error) {
-    return { address: "", error: result.error || "Failed to get address" };
+  try {
+    const result = await getAddress();
+    console.log("Freighter getAddress result:", result);
+    if (result.error) {
+      return { address: "", error: result.error || "Failed to get address" };
+    }
+    return { address: result.address };
+  } catch (e) {
+    console.error("getAddress failed:", e);
+    return { address: "", error: "Freighter extension not found. Please install it from freighter.app" };
   }
-  return { address: result.address };
 }
 
 export async function fetchXLMBalance(publicKey: string): Promise<string> {
