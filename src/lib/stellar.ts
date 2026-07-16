@@ -18,10 +18,12 @@ export async function checkFreighterConnection(): Promise<boolean> {
   }
 }
 
-export async function getFreighterAddress(): Promise<string> {
+export async function getFreighterAddress(): Promise<{ address: string; error?: string }> {
   const result = await getAddress();
-  if (result.error) throw new Error(result.error);
-  return result.address;
+  if (result.error) {
+    return { address: "", error: result.error || "Failed to get address" };
+  }
+  return { address: result.address };
 }
 
 export async function fetchXLMBalance(publicKey: string): Promise<string> {

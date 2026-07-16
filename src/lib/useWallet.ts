@@ -44,11 +44,12 @@ export function useWallet() {
         return { success: false, error: "Please install Freighter wallet" };
       }
 
-      const address = await getFreighterAddress();
-      if (!address || address.length === 0) {
+      const addressResult = await getFreighterAddress();
+      if (addressResult.error || !addressResult.address) {
         setWallet((prev) => ({ ...prev, isLoading: false }));
-        return { success: false, error: "Could not get wallet address" };
+        return { success: false, error: addressResult.error || "Could not get wallet address. Please approve in Freighter." };
       }
+      const address = addressResult.address;
       setWallet((prev) => ({
         ...prev,
         isConnected: true,
@@ -94,14 +95,14 @@ export function useWallet() {
       try {
         const connected = await checkFreighterConnection();
         if (connected) {
-          const address = await getFreighterAddress();
-          if (address && address.length > 0) {
+          const addressResult = await getFreighterAddress();
+          if (addressResult.address && addressResult.address.length > 0) {
             setWallet((prev) => ({
               ...prev,
               isConnected: true,
-              address,
+              address: addressResult.address,
             }));
-            await refreshBalance(address);
+            await refreshBalance(addressResult.address);
           }
         }
       } catch {
